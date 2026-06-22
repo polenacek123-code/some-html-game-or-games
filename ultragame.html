@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Selling Tycoon</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e8f5e9; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2e7d32; margin-top: 0; }
+        .stats { font-size: 1.3em; font-weight: bold; margin-bottom: 20px; background: #c8e6c9; padding: 10px; border-radius: 5px; }
+        .click-area { margin: 20px 0; }
+        button { background-color: #4caf50; color: white; border: none; padding: 12px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; margin: 5px; }
+        button:hover { background-color: #388e3c; }
+        button:disabled { background-color: #c8e6c9; color: #81c784; cursor: not-allowed; }
+        .grid { display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 20px; }
+        .section { background: #f1f8e9; padding: 15px; border-radius: 8px; width: 31%; min-width: 240px; margin: 10px; box-sizing: border-box; text-align: left; display: flex; flex-direction: column; justify-content: space-between; }
+        .section h3 { margin-top: 0; color: #2e7d32; border-bottom: 2px solid #c8e6c9; padding-bottom: 5px; }
+        .item-box { background: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .item-title { font-weight: bold; font-size: 0.95em; margin-bottom: 5px; }
+        .item-controls { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .btn-small { padding: 5px 8px; font-size: 0.85em; background-color: #0288d1; }
+        .btn-small:hover { background-color: #01579b; }
+        .btn-action { background-color: #ff9800; }
+        .btn-action:hover { background-color: #f57c00; }
+        .toggle-btn { background-color: #757575; padding: 8px 15px; width: 100%; }
+        .toggle-btn.active { background-color: #2e7d32; }
+        progress { width: 100%; height: 25px; border-radius: 5px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Water Selling Tycoon 💧</h1>
+    
+    <div class="stats">
+        Money: $<span id="money">0.00</span>
+        <div style="margin-top: 10px; font-size: 0.85em; font-weight: normal; color: #1b5e20;">
+            Cup Progress: <progress id="cup-progress" value="0" max="100"></progress>
+        </div>
+    </div>
+
+    <div class="click-area">
+        <button id="fill-btn" onclick="fillCup()">Fill Cup (Click!)</button>
+        <button id="sell-btn" onclick="sellCup()" disabled>Sell Water! ($<span id="cup-price">1.00</span>)</button>
+    </div>
+
+    <div class="grid">
+        <!-- Add-ons -->
+        <div class="section">
+            <h3>Add-ons (Add Value)</h3>
+            
+            <div class="item-box">
+                <div class="item-title">Lemons (+$0.50) <span id="lemon-status" style="color:green; display:none;">✓ Added</span></div>
+                <div class="item-controls">
+                    <span>Stock: <span id="lemon-stock">0</span></span>
+                    <button class="btn-small" onclick="buyItem('lemon')">Buy ($2)</button>
+                    <button id="use-lemon-btn" class="btn-small btn-action" onclick="manualUseItem('lemon')">Add</button>
+                </div>
+            </div>
+
+            <div class="item-box">
+                <div class="item-title">Ice Cubes (+$0.75) <span id="ice-status" style="color:green; display:none;">✓ Added</span></div>
+                <div class="item-controls">
+                    <span>Stock: <span id="ice-stock">0</span></span>
+                    <button class="btn-small" onclick="buyItem('ice')">Buy ($3)</button>
+                    <button id="use-ice-btn" class="btn-small btn-action" onclick="manualUseItem('ice')">Add</button>
+                </div>
+            </div>
+
+            <div class="item-box">
+                <div class="item-title">Straws (+$0.25) <span id="straw-status" style="color:green; display:none;">✓ Added</span></div>
+                <div class="item-controls">
+                    <span>Stock: <span id="straw-stock">0</span></span>
+                    <button class="btn-small" onclick="buyItem('straw')">Buy ($1)</button>
+                    <button id="use-straw-btn" class="btn-small btn-action" onclick="manualUseItem('straw')">Add</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrades -->
+        <div class="section">
+            <h3>Upgrades</h3>
+            <div class="item-box">
+                <div class="item-title">Bigger Cup (+100% Price)</div>
+                <button style="width:100%; margin: 5px 0 0 0;" onclick="upgrade('price')">Cost: $<span id="price-upgrade-cost">10</span></button>
+            </div>
+            <div class="item-box">
+                <div class="item-title">Faster Filling (+20% Speed)</div>
+                <button style="width:100%; margin: 5px 0 0 0;" onclick="upgrade('speed')">Cost: $<span id="speed-upgrade-cost">15</span></button>
+            </div>
+        </div>
+
+        <!-- Automation -->
+        <div class="section">
+            <h3>Automation</h3>
+            <div class="item-box">
+                <div class="item-title">Auto-Fill Dispenser</div>
+                <button id="unlock-auto-fill-btn" style="width:100%; margin:5px 0;" onclick="unlockAutomation('Fill', 30)">Unlock for $30</button>
+                <button id="auto-fill-btn" class="toggle-btn" style="display:none;" onclick="toggleAuto('Fill')">OFF</button>
+            </div>
+            <div class="item-box">
+                <div class="item-title">Auto-Ingredient Placer</div>
+                <button id="unlock-auto-use-btn" style="width:100%; margin:5px 0;" onclick="unlockAutomation('Use', 50)">Unlock for $50</button>
+                <button id="auto-use-btn" class="toggle-btn" style="display:none;" onclick="toggleAuto('Use')">OFF</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Game State
+    let money = 0;
+    let cupFilled = 0;
+    
+    // Stats & Inventory
+    let stock = { lemon: 0, ice: 0, straw: 0 };
+    let usedInCup = { lemon: false, ice: false, straw: false };
+    
+    // Upgrades Levels
+    let upgrades = { price: 1, speed: 1 };
+    let upgradeCosts = { price: 10, speed: 15 };
+    
+    // Automation Status
+    let autoFillUnlocked = false;
+    let autoUseUnlocked = false;
+    let autoFillActive = false;
+    let autoUseActive = false;
+
+    // Constants
+    const basePrices = { lemon: 0.50, ice: 0.75, straw: 0.25 };
+    const baseCost = 1.00;
+
+    // DOM Elements
+    const moneyDisplay = document.getElementById('money');
+    const fillBtn = document.getElementById('fill-btn');
+    const sellBtn = document.getElementById('sell-btn');
+    const cupPriceDisplay = document.getElementById('cup-price');
+    const cupProgress = document.getElementById('cup-progress');
+
+    // Calculate actual cup price based on add-ons and upgrades
+    function getCupPrice() {
+        let total = baseCost;
+        if (usedInCup.lemon) total += basePrices.lemon;
+        if (usedInCup.ice) total += basePrices.ice;
+        if (usedInCup.straw) total += basePrices.straw;
+        total = total * upgrades.price;
+        return total;
+    }
+
+    // Get fill rate based on speed upgrades
+    function getFillRate() {
+        return 5 * upgrades.speed; 
+    }
+
+    // Main Clicking Function
+    function fillCup() {
+        if (cupFilled < 100) {
+            cupFilled += getFillRate();
+            if (cupFilled >= 100) {
+                cupFilled = 100;
+                fillBtn.disabled = true;
+                sellBtn.disabled = false;
+            }
+            updateDisplay();
+        }
+    }
+
+    // Sell the cup of water
+    function sellCup() {
+        if (cupFilled >= 100) {
+            money += getCupPrice();
+            cupFilled = 0;
+            usedInCup = { lemon: false, ice: false, straw: false }; // Reset cup ingredients
+            
+            fillBtn.disabled = false;
+            sellBtn.disabled = true;
+            updateDisplay();
+        }
+    }
+
+    // Manual item insertion into the active cup
+    function manualUseItem(item) {
+        if (cupFilled > 0 && cupFilled < 100 && stock[item] > 0 && !usedInCup[item]) {
+            stock[item]--;
+            usedInCup[item] = true;
+            updateDisplay();
+        }
+    }
+
+    // Buying add-on items
+    function buyItem(item) {
+        const prices = { lemon: 2, ice: 3, straw: 1 };
+        if (money >= prices[item]) {
+            money -= prices[item];
+            stock[item]++;
+            updateDisplay();
+        }
+    }
+
+    // Upgrading capabilities
+    function upgrade(type) {
+        if (money >= upgradeCosts[type]) {
+            money -= upgradeCosts[type];
+            if (type === 'price') {
+                upgrades.price++;
+                upgradeCosts.price = Math.round(upgradeCosts.price * 2.5);
+            } else if (type === 'speed') {
+                upgrades.speed++;
+                upgradeCosts.speed = Math.round(upgradeCosts.speed * 2.5);
+            }
+            updateDisplay();
+        }
+    }
+
+    // Unlock Automation for Money
+    function unlockAutomation(type, cost) {
+        if (money >= cost) {
+            money -= cost;
+            if (type === 'Fill') {
+                autoFillUnlocked = true;
+                document.getElementById('unlock-auto-fill-btn').style.display = 'none';
+                document.getElementById('auto-fill-btn').style.display = 'block';
+            } else if (type === 'Use') {
+                autoUseUnlocked = true;
+                document.getElementById('unlock-auto-use-btn').style.display = 'none';
+                document.getElementById('auto-use-btn').style.display = 'block';
+            }
+            updateDisplay();
+        }
+    }
+
+    // Toggle automation buttons
+    function toggleAuto(type) {
+        if (type === 'Fill' && autoFillUnlocked) {
+            autoFillActive = !autoFillActive;
+            document.getElementById('auto-fill-btn').innerText = autoFillActive ? 'ON' : 'OFF';
+            document.getElementById('auto-fill-btn').classList.toggle('active');
+        } else if (type === 'Use' && autoUseUnlocked) {
+            autoUseActive = !autoUseActive;
+            document.getElementById('auto-use-btn').innerText = autoUseActive ? 'ON' : 'OFF';
+            document.getElementById('auto-use-btn').classList.toggle('active');
+        }
+    }
+
+    // Automatically consume items when filling
+    function triggerAutoAddons() {
+        if (autoUseActive && cupFilled > 0 && cupFilled < 100) {
+            if (!usedInCup.lemon && stock.lemon > 0) { usedInCup.lemon = true; stock.lemon--; }
+            if (!usedInCup.ice && stock.ice > 0) { usedInCup.ice = true; stock.ice--; }
+            if (!usedInCup.straw && stock.straw > 0) { usedInCup.straw = true; stock.straw--; }
+        }
+    }
+
+    // Update screen data
+    function updateDisplay() {
+        moneyDisplay.innerText = money.toFixed(2);
+        cupPriceDisplay.innerText = getCupPrice().toFixed(2);
+        cupProgress.value = cupFilled;
+
+        // Stock counters
+        document.getElementById('lemon-stock').innerText = stock.lemon;
+        document.getElementById('ice-stock').innerText = stock.ice;
+        document.getElementById('straw-stock').innerText = stock.straw;
+
+        // Upgrade prices
+        document.getElementById('price-upgrade-cost').innerText = upgradeCosts.price;
+        document.getElementById('speed-upgrade-cost').innerText = upgradeCosts.speed;
+
+        // Ingredient inclusion checkmarks
+        document.getElementById('lemon-status').style.display = usedInCup.lemon ? 'inline' : 'none';
+        document.getElementById('ice-status').style.display = usedInCup.ice ? 'inline' : 'none';
+        document.getElementById('straw-status').style.display = usedInCup.straw ? 'inline' : 'none';
+
+        // Manage Add buttons availability
+        const cupIsFilling = (cupFilled > 0 && cupFilled < 100);
+        document.getElementById('use-lemon-btn').disabled = !cupIsFilling || stock.lemon <= 0 || usedInCup.lemon;
+        document.getElementById('use-ice-btn').disabled = !cupIsFilling || stock.ice <= 0 || usedInCup.ice;
+        document.getElementById('use-straw-btn').disabled = !cupIsFilling || stock.straw <= 0 || usedInCup.straw;
+    }
+
+    // Game loop running 20 times a second
+    setInterval(function() {
+        // Auto-fill logic
+        if (autoFillActive && cupFilled < 100 && !fillBtn.disabled) {
+            fillCup();
+        }
+
+        // Auto-use logic
+        triggerAutoAddons();
+
+        updateDisplay();
+    }, 50);
+
+</script>
+
+</body>
+</html>
